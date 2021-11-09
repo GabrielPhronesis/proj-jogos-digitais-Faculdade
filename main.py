@@ -41,12 +41,11 @@ menu = True
 mecanica = False
 
 
-personX = 100
-personY = 350
-up = 1
+monster_frequency = [7000,5000,4000,3000]
+last_monster = pygame.time.get_ticks()
 
-monster_frequency = 1500
-last_monster = pygame.time.get_ticks() - monster_frequency
+velocidade = [3,5,8,10,12]
+
 #classe player
 class Player():
     def __init__(self, x, y):
@@ -100,7 +99,7 @@ ghost = Player(screen_width//6, screen_height -90 )
 monster_group = pygame.sprite.Group()
 
 
-
+#instancia dos botoes
 start_button = button.Button(205, 140, start_img,0.1)
 exit_button = button.Button(355, 140, exit_img,0.1)
 tutorial_button = button.Button(205, 245, tutorial_img,0.1)
@@ -149,14 +148,14 @@ while True:
         screen.blit(back, (rel_x - back.get_rect().width, -450))
         if rel_x < 700:
             screen.blit(back, (rel_x, -450))
-        x -= 3
-        velocidade += 0.0001
+        x -= velocidade[0]
+
 
     if mecanica:
         monster_group.draw(screen)
         monster_group.update()
         time_now = pygame.time.get_ticks()
-        if time_now - last_monster > monster_frequency:
+        if time_now - last_monster > monster_frequency[0]:
             btm_monster = Monster(screen_width+500, random.randint(50,250))
             monster_group.add(btm_monster)
             last_monster = time_now
@@ -168,7 +167,7 @@ while True:
 
 
 
-    pygame.draw.rect(screen, color, pygame.Rect(20, -20, 60, 60))
+    #pygame.draw.rect(screen, color, pygame.Rect(20, -20, 60, 60))
 
         
 
