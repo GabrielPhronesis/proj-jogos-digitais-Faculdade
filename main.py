@@ -4,112 +4,165 @@ from pygame.locals import *
 from sys import exit
 import button
 import random
-#inicia o pygame
+
+# inicia o pygame
 pygame.init()
 
-#dimenções da tela
+# dimenções da tela
 screen_width = 700
 screen_height = 450
 
-#cria a janela
+# cria a janela
 screen = pygame.display.set_mode((screen_width, screen_height))
 
-#set frame rate
+# set frame rate
 clock = pygame.time.Clock()
 
-#cores
-white = (255,255,255)
+# cores
+white = (255, 255, 255)
 
-#rotas das imagens
-monster_image = pygame.image.load('assets/monstro.png').convert_alpha()
-ghost_image = pygame.image.load('assets/sprite_0.png').convert_alpha()
+# rotas das imagens
+monster_image = pygame.image.load('assets/fantasma_1.png').convert_alpha()
+player_image = pygame.image.load('assets/PERSONAGEM_1_v2.png').convert_alpha()
 bg_image = pygame.image.load('assets/background_startgame.png').convert_alpha()
 start_img = pygame.image.load('assets/botao_jogar.png').convert_alpha()
 exit_img = pygame.image.load('assets/botao_sair.png').convert_alpha()
-tutorial_img = pygame.image.load('assets/botao_tutorial.png').convert_alpha()
-credit_img = pygame.image.load('assets/botao_creditos.png').convert_alpha()
-som_img = pygame.image.load('assets/botao_som_off.png.png').convert_alpha()
+tutorial_img = pygame.image.load('assets/botao_TrocaPERSONAGEM.png').convert_alpha()
+credit_img = pygame.image.load('assets/botao_TrocaMAPA.png').convert_alpha()
+restart_img = pygame.image.load('assets/botao_Restart.png')
+menu_img = pygame.image.load('assets/botao_Menu.png')
 
-#game variables
-y=0
-x=0
-velocidade = 1
+font = pygame.font.SysFont('Bauhaus 93', 40)
+
+# game variables
+y = 0
+x = 0
 
 paralaxVert = False
 paralaxHorin = False
 menu = True
 mecanica = False
+invtParalaxVert = False
+game_over = False
+colisao = False
 
+cenario= 1
+personagem = 1
 
-monster_frequency = [7000,5000,4000,3000]
+monster_frequency = [3000,2500,1900,1000, 400]
 last_monster = pygame.time.get_ticks()
 
-velocidade = [3,5,8,10,12]
+velocidade = [3, 5, 8,11,15]
 
-#classe player
-class Player():
-    def __init__(self, x, y):
-        self.image = pygame.transform.scale(ghost_image,(int(90), int(90)))
-        self.width = 50
-        self.height = 80
-        self.rect = pygame.Rect(0,0, self.width, self.height)
-        self.rect.center = (x,y)
-    def move(self):
-        #reseta variaveis
+index = 0
+level =0
+
+pontos = 0
+
+
+
+def draw_text(text, font, text_col, x, y):
+    img = font.render(text, True, text_col)
+    screen.blit(img, (x, y))
+def reset_game ():
+    monster_group.empty()
+    jogador.rect.x = screen_width // 8
+    jogador.rect.y = screen_height - 90
+    jogador.vidas = 3
+    return 0
+
+# classe player
+class Player(pygame.sprite.Sprite):
+    def __init__(self, x, y, number):
+        pygame.sprite.Sprite.__init__(self)
+        self.images = []
+        self.index = 0
+        self.counter = 0
+
+
+        for num in range(1, 4):
+            img1 = pygame.image.load(f'assets/PERSONAGEM_1_v{num}.png')
+            if number == 1:
+                img1= pygame.image.load(f'assets/PERSONAGEM_1_v{num}.png')
+            if number == -1:
+                img1 = pygame.image.load(f'assets/PERSONAGEM_2_v{num}.png')
+            img2 = pygame.transform.scale(img1, (int(90), int(90)))
+            img = pygame.transform.flip(img2, True, False)
+            self.images.append(img)
+        self.image = self.images[self.index]
+        #self.image = pygame.transform.scale(player_image, (int(90), int(90)))
+        self.rect = self.image.get_rect()
+        self.rect.center = [x, y]
+        self.vel = 0
+        self.vidas = 3
+        pygame.transform.flip(self.image, True, False)
+    def update(self):
+        self.counter += 1
+        pers_cooldown = 5
+        if self.counter > pers_cooldown:
+            self.counter = 0
+            self.index += 1
+            if self.index >= len(self.images):
+                self.index = 0
+        self.image = self.images[self.index]
+        # reseta variaveis
         dx = 0
         dy = 0
 
-        #processa botões
+        # processa botões
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT]:
             dy = -4
-        else :
+        else:
             dy = 2
 
-        #bloqueia o player sair da tela
+        # bloqueia o player sair da tela
         if self.rect.y >= 330:
             self.rect.y = 330
         if self.rect.y <= 5:
             self.rect.y = 5
 
-        #atualiza a posição do retangulo
+        # atualiza a posição
         self.rect.x += dx
         self.rect.y += dy
-    def draw (self):
-        screen.blit(pygame.transform.flip(self.image, True , False), (self.rect.x - 24 , self.rect.y-10))
-        pygame.draw.rect(screen, white, self.rect, 2)
 
 
-
-#monster class
+# monster class
 class Monster(pygame.sprite.Sprite):
-    def __init__(self,x,y):
+    def __init__(self, x, y):
         pygame.sprite.Sprite.__init__(self)
-        self.image = monster_image
+        self.image = pygame.transform.scale(monster_image, (int(60), int(60)))
         self.rect = self.image.get_rect()
-        self.rect.topleft = [x,y]
+        self.rect.topleft = [x, y]
 
     def update(self):
-        self.rect.x -= 3
+        self.rect.x -= velocidade[level]
+
+        if self.rect.right < 0:
+            self.kill()
+
+            jogador.vidas -= 1
+        if colisao == True and self.rect.left < screen_width // 4:
+            self.kill()
 
 
-#instacia do jogador
-ghost = Player(screen_width//6, screen_height -90 )
+player_group = pygame.sprite.Group()
+jogador = Player(screen_width // 8, screen_height - 90,personagem)
+player_group.add(jogador)
 
 monster_group = pygame.sprite.Group()
 
+# instancia dos botoes
+start_button = button.Button(205, 140, start_img, 0.1)
+exit_button = button.Button(355, 140, exit_img, 0.1)
+tutorial_button = button.Button(205, 245, tutorial_img, 0.05)
+credit_button = button.Button(355, 245, credit_img, 0.05)
+restart_button = button.Button(205,140,restart_img, 0.05)
+menu_button = button.Button(355,140,menu_img, 0.05)
 
-#instancia dos botoes
-start_button = button.Button(205, 140, start_img,0.1)
-exit_button = button.Button(355, 140, exit_img,0.1)
-tutorial_button = button.Button(205, 245, tutorial_img,0.1)
-credit_button = button.Button(355, 245, credit_img,0.1)
-som_button = button.Button(200,200, som_img,0.1)
 
 
 back = pygame.transform.scale(bg_image, (int(700), int(900)))
-
-
 
 while True:
 
@@ -117,59 +170,113 @@ while True:
         if event.type == QUIT:
             pygame.quit()
             exit()
-    color = (255, 0, 0)
+    colisao = False
 
     if menu:
         screen.blit(back, (0, 0))
-
         if credit_button.draw(screen):
-            print('credit')
+            cenario = cenario *-1
+            if cenario == 1:
+                bg_image = pygame.image.load('assets/background_startgame.png').convert_alpha()
+                back = pygame.transform.scale(bg_image, (int(700), int(900)))
+            if cenario == -1:
+                bg_image = pygame.image.load('assets/background_startgame-2.png').convert_alpha()
+                back = pygame.transform.scale(bg_image, (int(700), int(900)))
+            #monster_image = pygame.image.load('assets/fantasma_1.png').convert_alpha()
+            #player_image = pygame.image.load('assets/PERSONAGEM_1_v2.png').convert_alpha()
+
         if tutorial_button.draw(screen):
-            print('tutorial')
+
+            personagem = personagem *-1
+
+            player_group.empty()
+            player_group = pygame.sprite.Group()
+            jogador = Player(screen_width // 8, screen_height - 90,personagem)
+            player_group.add(jogador)
+
+            monster_group.empty()
+            if personagem == 1:
+                print('personagem principal')
+            if personagem == -1:
+                print('personagem secundario')
         if start_button.draw(screen):
-            paralaxVert= True
-            menu= False
+            paralaxVert = True
+            menu = False
+            index = reset_game()
+            pontos = index
+            level = index
         if exit_button.draw(screen):
             exit()
 
     if paralaxVert:
         rel_y = y % back.get_rect().height
         if y > -450:
-            y -= 4.5
+            y -= 5.5
         if y <= -450:
             paralaxVert = False
             paralaxHorin = True
             mecanica = True
         screen.blit(back, (0, rel_y - back.get_rect().height))
 
-
     if paralaxHorin:
         rel_x = x % back.get_rect().width
         screen.blit(back, (rel_x - back.get_rect().width, -450))
         if rel_x < 700:
             screen.blit(back, (rel_x, -450))
-        x -= velocidade[0]
+        x -= velocidade[level]
 
+    if invtParalaxVert:
+        rel_y = y % back.get_rect().height
+        if y < 0:
+            y += 5.5
+        if y >= 0:
+            invtParalaxVert = False
+            menu = True
 
+        screen.blit(back, (0, rel_y - back.get_rect().height))
     if mecanica:
+        if pontos == 0:
+            index = 0
+        player_group.draw(screen)
+        player_group.update()
         monster_group.draw(screen)
-        monster_group.update()
+
+        draw_text(str(pontos), font, white, int(screen_width / 2) - 20, 20)
+        draw_text("Vidas:" + str(jogador.vidas), font, white, int(screen_width) - 150, 20)
+        if pontos == 5:
+            level = 1
+        if pontos == 10:
+            level = 2
+        if pontos == 15:
+            level = 3
+        if pontos == 20:
+            level = 4
+        if jogador.vidas == 0:
+            game_over = True
+            paralaxHorin = False
+            mecanica = False
+        if pygame.sprite.groupcollide(player_group, monster_group, False, False):
+            colisao = True
+            pontos += 1
+
+
         time_now = pygame.time.get_ticks()
-        if time_now - last_monster > monster_frequency[0]:
-            btm_monster = Monster(screen_width+500, random.randint(50,250))
+        if time_now - last_monster > monster_frequency[level]:
+            btm_monster = Monster(screen_width + 500, random.randint(50, 250))
             monster_group.add(btm_monster)
             last_monster = time_now
-
-        ghost.draw()
-        ghost.move()
-
-
-
-
-
-    #pygame.draw.rect(screen, color, pygame.Rect(20, -20, 60, 60))
-
-        
+        monster_group.update()
+    if game_over:
+        if menu_button.draw(screen):
+            invtParalaxVert = True
+            game_over = False
+        if restart_button.draw(screen):
+            index = reset_game()
+            pontos = index
+            level = index
+            paralaxHorin = True
+            mecanica = True
+            game_over = False
 
 
     pygame.display.update()
