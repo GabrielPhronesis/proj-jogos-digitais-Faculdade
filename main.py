@@ -80,13 +80,13 @@ class Player(pygame.sprite.Sprite):
         self.counter = 0
 
 
-        for num in range(1, 4):
+        for num in range(1, 6):
             img1 = pygame.image.load(f'assets/PERSONAGEM_1_v{num}.png')
             if number == 1:
                 img1= pygame.image.load(f'assets/PERSONAGEM_1_v{num}.png')
             if number == -1:
                 img1 = pygame.image.load(f'assets/PERSONAGEM_2_v{num}.png')
-            img2 = pygame.transform.scale(img1, (int(90), int(90)))
+            img2 = pygame.transform.scale(img1, (int(70), int(112)))
             img = pygame.transform.flip(img2, True, False)
             self.images.append(img)
         self.image = self.images[self.index]
@@ -129,9 +129,15 @@ class Player(pygame.sprite.Sprite):
 
 # monster class
 class Monster(pygame.sprite.Sprite):
-    def __init__(self, x, y):
+    def __init__(self, x, y,number):
         pygame.sprite.Sprite.__init__(self)
-        self.image = pygame.transform.scale(monster_image, (int(60), int(60)))
+
+        if number == 1:
+            img1 = pygame.image.load('assets/fantasma_1.png')
+        if number == -1:
+            img1 = pygame.image.load('assets/fantasma_2.png')
+
+        self.image = pygame.transform.scale(img1, (int(60), int(60)))
         self.rect = self.image.get_rect()
         self.rect.topleft = [x, y]
 
@@ -262,7 +268,7 @@ while True:
 
         time_now = pygame.time.get_ticks()
         if time_now - last_monster > monster_frequency[level]:
-            btm_monster = Monster(screen_width + 500, random.randint(50, 250))
+            btm_monster = Monster(screen_width + 500, random.randint(50, 250),personagem)
             monster_group.add(btm_monster)
             last_monster = time_now
         monster_group.update()
