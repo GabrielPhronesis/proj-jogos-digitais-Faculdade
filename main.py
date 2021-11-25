@@ -49,10 +49,10 @@ colisao = False
 cenario= 1
 personagem = 1
 
-monster_frequency = [3000,2500,1900,1000, 400]
+monster_frequency = [3000,2500,2000,1800,1500,1100,800,600,400]
 last_monster = pygame.time.get_ticks()
 
-velocidade = [3, 5, 8,11,15]
+velocidade = [3,5,7,8,9,10,11,13,15]
 
 index = 0
 level =0
@@ -90,7 +90,6 @@ class Player(pygame.sprite.Sprite):
             img = pygame.transform.flip(img2, True, False)
             self.images.append(img)
         self.image = self.images[self.index]
-        #self.image = pygame.transform.scale(player_image, (int(90), int(90)))
         self.rect = self.image.get_rect()
         self.rect.center = [x, y]
         self.vel = 0
@@ -169,7 +168,9 @@ menu_button = button.Button(355,140,menu_img, 0.05)
 
 
 back = pygame.transform.scale(bg_image, (int(700), int(900)))
-
+pygame.mixer.music.load('assets/musica.mp3')
+pygame.mixer.music.set_volume(0.20)
+pygame.mixer.music.play(-1)
 while True:
 
     for event in pygame.event.get():
@@ -202,9 +203,9 @@ while True:
 
             monster_group.empty()
             if personagem == 1:
-                print('personagem principal')
+                print('James')
             if personagem == -1:
-                print('personagem secundario')
+                print('James universo paralelo')
         if start_button.draw(screen):
             paralaxVert = True
             menu = False
@@ -257,6 +258,14 @@ while True:
             level = 3
         if pontos == 20:
             level = 4
+        if pontos == 25:
+            level = 5
+        if pontos == 30:
+            level = 6
+        if pontos == 35:
+            level = 7
+        if pontos == 40:
+            level = 8
         if jogador.vidas == 0:
             game_over = True
             paralaxHorin = False
@@ -268,7 +277,7 @@ while True:
 
         time_now = pygame.time.get_ticks()
         if time_now - last_monster > monster_frequency[level]:
-            btm_monster = Monster(screen_width + 500, random.randint(50, 250),personagem)
+            btm_monster = Monster(screen_width + 500, random.randint(60, 350),personagem)
             monster_group.add(btm_monster)
             last_monster = time_now
         monster_group.update()
