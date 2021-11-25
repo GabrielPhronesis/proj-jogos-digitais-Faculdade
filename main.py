@@ -170,7 +170,7 @@ menu_button = button.Button(355,300,menu_img, 0.05)
 
 back = pygame.transform.scale(bg_image, (int(700), int(900)))
 pygame.mixer.music.load('assets/musica.mp3')
-pygame.mixer.music.set_volume(0.00)
+pygame.mixer.music.set_volume(0.20)
 pygame.mixer.music.play(-1)
 while True:
 
