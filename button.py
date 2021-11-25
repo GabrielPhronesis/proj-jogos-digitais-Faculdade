@@ -1,6 +1,4 @@
 import pygame
-
-
 class Button():
     def __init__(self, x, y, image, scale):
         #pega altura e largura da imagem

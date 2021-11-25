@@ -31,7 +31,8 @@ tutorial_img = pygame.image.load('assets/botao_TrocaPERSONAGEM.png').convert_alp
 credit_img = pygame.image.load('assets/botao_TrocaMAPA.png').convert_alpha()
 restart_img = pygame.image.load('assets/botao_Restart.png')
 menu_img = pygame.image.load('assets/botao_Menu.png')
-
+gameover_img1 = pygame.image.load('assets/gameover.png')
+gameover_img = pygame.transform.scale(gameover_img1, (int(250), int(150)))
 font = pygame.font.SysFont('Bauhaus 93', 40)
 
 # game variables
@@ -162,14 +163,14 @@ start_button = button.Button(205, 140, start_img, 0.1)
 exit_button = button.Button(355, 140, exit_img, 0.1)
 tutorial_button = button.Button(205, 245, tutorial_img, 0.05)
 credit_button = button.Button(355, 245, credit_img, 0.05)
-restart_button = button.Button(205,140,restart_img, 0.05)
-menu_button = button.Button(355,140,menu_img, 0.05)
+restart_button = button.Button(205,300,restart_img, 0.05)
+menu_button = button.Button(355,300,menu_img, 0.05)
 
 
 
 back = pygame.transform.scale(bg_image, (int(700), int(900)))
 pygame.mixer.music.load('assets/musica.mp3')
-pygame.mixer.music.set_volume(0.20)
+pygame.mixer.music.set_volume(0.00)
 pygame.mixer.music.play(-1)
 while True:
 
@@ -282,6 +283,7 @@ while True:
             last_monster = time_now
         monster_group.update()
     if game_over:
+        screen.blit(gameover_img, ((screen_width/2)-125, 100))
         if menu_button.draw(screen):
             invtParalaxVert = True
             game_over = False
